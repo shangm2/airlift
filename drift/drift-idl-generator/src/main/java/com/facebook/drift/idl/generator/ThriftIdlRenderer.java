@@ -137,7 +137,7 @@ public final class ThriftIdlRenderer
             if (metadata.getByEnumConstant() != null) {
                 builder.append(" = ").append(metadata.getByEnumConstant().get(entry.getKey()));
             }
-            builder.append(";\n");
+            builder.append(",\n");
         }
         return builder.toString();
     }

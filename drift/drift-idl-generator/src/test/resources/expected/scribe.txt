@@ -1,6 +1,6 @@
 enum Result {
-  OK = 0;
-  TRY_LATER = 1;
+  OK = 0,
+  TRY_LATER = 1,
 }
 
 struct DriftLogEntry {

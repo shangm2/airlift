@@ -5,15 +5,15 @@ enum Fruit {
   /**
    * Large and sweet
    */
-  APPLE = 2;
+  APPLE = 2,
 
   /**
    * Yellow
    */
-  BANANA = 3;
+  BANANA = 3,
 
   /**
    * Small and tart
    */
-  CHERRY = 5;
+  CHERRY = 5,
 }

@@ -16,6 +16,7 @@
 package com.facebook.drift.idl.generator;
 
 import com.facebook.drift.annotations.ThriftField;
+import com.facebook.drift.annotations.ThriftIdlAnnotation;
 import com.facebook.drift.annotations.ThriftStruct;
 
 import static com.facebook.drift.annotations.ThriftField.Recursiveness.TRUE;
@@ -23,10 +24,12 @@ import static com.facebook.drift.annotations.ThriftField.Recursiveness.TRUE;
 @ThriftStruct
 public class TreeNode
 {
-    @ThriftField(value = 1, isRecursive = TRUE)
+    @ThriftField(value = 1, isRecursive = TRUE, idlAnnotations = {
+            @ThriftIdlAnnotation(key = "cpp.ref_type", value = "\"shared\"")})
     public TreeNode left;
 
-    @ThriftField(value = 2, isRecursive = TRUE)
+    @ThriftField(value = 2, isRecursive = TRUE, idlAnnotations = {
+            @ThriftIdlAnnotation(key = "cpp.ref_type", value = "\"shared\"")})
     public TreeNode right;
 
     @ThriftField(3)

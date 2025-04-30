@@ -162,14 +162,23 @@ public final class ThriftIdlRenderer
             }
             builder.append(separator.getAndUpdate(!field.getDocumentation().isEmpty()))
                     .append(documentation(field.getDocumentation(), "  "))
-                    .append(format("  %s: %s%s %s;\n",
+                    .append(format("  %s: %s%s %s%s;\n",
                             field.getId(),
                             requiredness(field.getRequiredness()),
                             typeName(field.getThriftType()),
-                            field.getName()));
+                            field.getName(),
+                            formatAnnotations(field.getIdlAnnotations())));
         }
 
         return builder.append("}\n").toString();
+    }
+
+    private static String formatAnnotations(Map<String, String> annotations)
+    {
+        if (annotations.isEmpty()) {
+            return "";
+        }
+        return " (" + Joiner.on(", ").withKeyValueSeparator("=").join(annotations) + ")";
     }
 
     private static String structKind(ThriftStructMetadata struct)

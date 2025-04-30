@@ -1,5 +1,5 @@
 struct TreeNode {
-  1: TreeNode left;
-  2: TreeNode right;
+  1: TreeNode left (cpp.ref_type="shared", drift.recursive_reference=true);
+  2: TreeNode right (cpp.ref_type="shared", drift.recursive_reference=true);
   3: string data;
 }

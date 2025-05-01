@@ -1,0 +1,5 @@
+struct OptionalField {
+  1: optional string optionalString;
+  2: optional i64 optionalLong;
+  3: optional i32 optionalInteger;
+}

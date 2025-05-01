@@ -17,6 +17,7 @@ package com.facebook.drift.idl.generator;
 
 import com.facebook.drift.annotations.ThriftField.Requiredness;
 import com.facebook.drift.codec.ThriftProtocolType;
+import com.facebook.drift.codec.metadata.ReflectionHelper;
 import com.facebook.drift.codec.metadata.ThriftEnumMetadata;
 import com.facebook.drift.codec.metadata.ThriftFieldMetadata;
 import com.facebook.drift.codec.metadata.ThriftMethodMetadata;
@@ -27,6 +28,7 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
+import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -164,7 +166,7 @@ public final class ThriftIdlRenderer
                     .append(documentation(field.getDocumentation(), "  "))
                     .append(format("  %s: %s%s %s;\n",
                             field.getId(),
-                            requiredness(field.getRequiredness()),
+                            requiredness(field),
                             typeName(field.getThriftType()),
                             field.getName()));
         }
@@ -186,8 +188,14 @@ public final class ThriftIdlRenderer
         throw new IllegalArgumentException("Unknown type: " + struct);
     }
 
-    private static String requiredness(Requiredness requiredness)
+    private static String requiredness(ThriftFieldMetadata field)
     {
+        Type type = field.getThriftType().getJavaType();
+        if (ReflectionHelper.isOptional(type)) {
+            return "optional ";
+        }
+
+        Requiredness requiredness = field.getRequiredness();
         switch (requiredness) {
             case REQUIRED:
                 return "required ";

@@ -22,6 +22,7 @@ import com.facebook.drift.codec.metadata.FieldKind;
 import com.facebook.drift.codec.metadata.MetadataErrorException;
 import com.facebook.drift.codec.metadata.MetadataErrors.Monitor;
 import com.facebook.drift.codec.metadata.MetadataWarningException;
+import com.facebook.drift.codec.metadata.ReflectionHelper;
 import com.facebook.drift.codec.metadata.ThriftCatalog;
 import com.facebook.drift.codec.metadata.ThriftFieldMetadata;
 import com.facebook.drift.codec.metadata.ThriftMethodMetadata;
@@ -35,6 +36,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
+import java.lang.reflect.Type;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -318,6 +320,12 @@ public class ThriftIdlGenerator
     @SuppressFBWarnings("NS_DANGEROUS_NON_SHORT_CIRCUIT")
     private boolean verifyField(ThriftType type)
     {
+        if (ReflectionHelper.isOptional(type.getJavaType())) {
+            Type unwrappedJavaType = ReflectionHelper.getOptionalType(type.getJavaType());
+            ThriftType thriftType = this.codecManager.getCatalog().getThriftType(unwrappedJavaType);
+            return verifyField(thriftType);
+        }
+
         ThriftProtocolType proto = type.getProtocolType();
         if (proto == ThriftProtocolType.SET || proto == ThriftProtocolType.LIST) {
             return verifyElementType(type.getValueTypeReference());

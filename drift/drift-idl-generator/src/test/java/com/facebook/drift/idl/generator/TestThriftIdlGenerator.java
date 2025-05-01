@@ -39,6 +39,7 @@ public class TestThriftIdlGenerator
         assertGenerated(Fruit.class, "fruit", ignored -> {});
         assertGenerated(URIField.class, "uri", ignored -> {});
         assertGenerated(TreeNode.class, "tree", ignored -> {});
+        assertGenerated(OptionalField.class, "optional", ignored -> {});
 
         assertGenerated(Point.class, "point", config -> config
                 .namespaces(ImmutableMap.<String, String>builder()

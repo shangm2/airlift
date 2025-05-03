@@ -15,6 +15,13 @@
  */
 package com.facebook.drift.idl.generator;
 
+import com.facebook.drift.codec.internal.builtin.OptionalDoubleThriftCodec;
+import com.facebook.drift.codec.internal.builtin.OptionalIntThriftCodec;
+import com.facebook.drift.codec.internal.builtin.OptionalLongThriftCodec;
+import com.facebook.drift.codec.metadata.ThriftCatalog;
+import com.facebook.drift.codec.utils.DataSizeToBytesThriftCodec;
+import com.facebook.drift.codec.utils.DurationToMillisThriftCodec;
+import com.facebook.drift.codec.utils.JodaDateTimeToEpochMillisThriftCodec;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.io.Resources;
@@ -40,6 +47,7 @@ public class TestThriftIdlGenerator
         assertGenerated(URIField.class, "uri", ignored -> {});
         assertGenerated(TreeNode.class, "tree", ignored -> {});
         assertGenerated(OptionalField.class, "optional", ignored -> {});
+        assertGenerated(CustomField.class, "custom", ignored -> {});
 
         assertGenerated(Point.class, "point", config -> config
                 .namespaces(ImmutableMap.<String, String>builder()
@@ -71,6 +79,15 @@ public class TestThriftIdlGenerator
         configConsumer.accept(config);
 
         ThriftIdlGenerator generator = new ThriftIdlGenerator(config.build());
+        ThriftCatalog catalog = generator.getCatalog();
+        generator.addCustomType(
+                new DurationToMillisThriftCodec(catalog).getType(),
+                new DataSizeToBytesThriftCodec(catalog).getType(),
+                new JodaDateTimeToEpochMillisThriftCodec(catalog).getType(),
+                new OptionalIntThriftCodec().getType(),
+                new OptionalLongThriftCodec().getType(),
+                new OptionalDoubleThriftCodec().getType());
+
         String idl = generator.generate(ImmutableList.of(clazz.getName()));
 
         assertEquals(idl, expected);

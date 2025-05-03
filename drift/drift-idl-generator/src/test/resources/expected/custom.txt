@@ -1,0 +1,5 @@
+struct CustomField {
+  1: double dataSize;
+  2: double duration;
+  3: i64 dateTime;
+}

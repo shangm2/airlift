@@ -80,10 +80,12 @@ public class ThriftIdlGenerator
     private final ClassLoader classLoader;
     private final Consumer<String> verboseLogger;
     private final ThriftCodecManager codecManager;
+    private final ThriftCatalog catalog;
     private final String defaultPackage;
     private final Map<Object, String> includes = new HashMap<>();
     private final Set<ThriftType> usedIncludedTypes = new HashSet<>();
     private final Map<String, String> namespaces;
+    private final Set<ThriftType> customTypes = new HashSet<>();
 
     private Set<ThriftType> knownTypes = new HashSet<>(BUILT_IN_TYPES);
     private ThriftTypeRenderer typeRenderer = new ThriftTypeRenderer(ImmutableMap.of());
@@ -101,7 +103,8 @@ public class ThriftIdlGenerator
         this.classLoader = requireNonNull(classLoader, "classLoader is null");
 
         Monitor monitor = createMonitor(config.getErrorLogger(), config.getWarningLogger());
-        this.codecManager = new ThriftCodecManager(new ThriftCatalog(monitor));
+        this.catalog = new ThriftCatalog(monitor);
+        this.codecManager = new ThriftCodecManager(catalog);
 
         this.verboseLogger = config.getVerboseLogger();
         String defaultPackage = config.getDefaultPackage();
@@ -126,6 +129,19 @@ public class ThriftIdlGenerator
 
         this.namespaces = config.getNamespaces();
         this.recursive = config.isRecursive();
+    }
+
+    public void addCustomType(ThriftType... type)
+    {
+        for (ThriftType t : type) {
+            customTypes.add(t);
+            knownTypes.add(t);
+        }
+    }
+
+    public ThriftCatalog getCatalog()
+    {
+        return catalog;
     }
 
     public String generate(Iterable<String> inputs)
@@ -188,6 +204,7 @@ public class ThriftIdlGenerator
             recursive = false;
             usedIncludedTypes.clear();
             knownTypes = new HashSet<>(BUILT_IN_TYPES);
+            knownTypes.addAll(customTypes);
         }
         return verifyTypes() & verifyServices();
     }

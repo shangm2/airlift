@@ -2,4 +2,7 @@ struct OptionalField {
   1: optional string optionalString;
   2: optional i64 optionalLong;
   3: optional i32 optionalInteger;
+  4: optional i32 primitiveOptionalInt;
+  5: optional i64 primitiveOptionalLong;
+  6: double primitiveOptionalDouble;
 }

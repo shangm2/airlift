@@ -15,34 +15,21 @@
  */
 package com.facebook.drift.idl.generator;
 
+import com.facebook.airlift.units.DataSize;
+import com.facebook.airlift.units.Duration;
 import com.facebook.drift.annotations.ThriftField;
 import com.facebook.drift.annotations.ThriftStruct;
+import org.joda.time.DateTime;
 
-import java.util.Optional;
-import java.util.OptionalDouble;
-import java.util.OptionalInt;
-import java.util.OptionalLong;
-
-import static com.facebook.drift.annotations.ThriftField.Requiredness.OPTIONAL;
-
-@ThriftStruct("OptionalField")
-public class OptionalField
+@ThriftStruct("CustomField")
+public class CustomField
 {
     @ThriftField(1)
-    public Optional<String> optionalString;
+    public DataSize dataSize;
 
-    @ThriftField(value = 2, requiredness = OPTIONAL)
-    public Optional<Long> optionalLong;
+    @ThriftField(2)
+    public Duration duration;
 
-    @ThriftField(value = 3, requiredness = OPTIONAL)
-    public Integer optionalInteger;
-
-    @ThriftField(value = 4, requiredness = OPTIONAL)
-    public OptionalInt primitiveOptionalInt;
-
-    @ThriftField(value = 5, requiredness = OPTIONAL)
-    public OptionalLong primitiveOptionalLong;
-
-    @ThriftField(value = 6)
-    public OptionalDouble primitiveOptionalDouble;
+    @ThriftField(3)
+    public DateTime dateTime;
 }

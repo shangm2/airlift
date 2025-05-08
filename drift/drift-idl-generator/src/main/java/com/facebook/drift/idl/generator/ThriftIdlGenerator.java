@@ -88,7 +88,7 @@ public class ThriftIdlGenerator
     private final Set<ThriftType> customTypes = new HashSet<>();
 
     private Set<ThriftType> knownTypes = new HashSet<>(BUILT_IN_TYPES);
-    private ThriftTypeRenderer typeRenderer = new ThriftTypeRenderer(ImmutableMap.of());
+    private ThriftTypeRenderer typeRenderer;
     private List<ThriftType> thriftTypes = new CopyOnWriteArrayList<>();
     private List<ThriftServiceMetadata> thriftServices = new CopyOnWriteArrayList<>();
     private boolean recursive;
@@ -102,9 +102,9 @@ public class ThriftIdlGenerator
     {
         this.classLoader = requireNonNull(classLoader, "classLoader is null");
 
-        Monitor monitor = createMonitor(config.getErrorLogger(), config.getWarningLogger());
-        this.catalog = new ThriftCatalog(monitor);
+        this.catalog = new ThriftCatalog(createMonitor(config.getErrorLogger(), config.getWarningLogger()));
         this.codecManager = new ThriftCodecManager(catalog);
+        this.typeRenderer = new ThriftTypeRenderer(ImmutableMap.of(), catalog);
 
         this.verboseLogger = config.getVerboseLogger();
         String defaultPackage = config.getDefaultPackage();
@@ -443,7 +443,7 @@ public class ThriftIdlGenerator
             includesBuilder.add(filename);
             typesBuilder.put(type, getNameWithoutExtension(filename));
         }
-        typeRenderer = new ThriftTypeRenderer(typesBuilder.build());
+        typeRenderer = new ThriftTypeRenderer(typesBuilder.build(), catalog);
         return renderThriftIdl(namespaces, includesBuilder.build(), thriftTypes, thriftServices, typeRenderer);
     }
 

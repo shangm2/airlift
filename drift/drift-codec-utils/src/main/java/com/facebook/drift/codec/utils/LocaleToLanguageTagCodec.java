@@ -15,6 +15,7 @@
  */
 package com.facebook.drift.codec.utils;
 
+import com.facebook.drift.codec.CodecThriftType;
 import com.facebook.drift.codec.ThriftCodec;
 import com.facebook.drift.codec.internal.coercion.FromThrift;
 import com.facebook.drift.codec.internal.coercion.ToThrift;
@@ -31,16 +32,24 @@ import static java.util.Objects.requireNonNull;
 public class LocaleToLanguageTagCodec
         implements ThriftCodec<Locale>
 {
+    private static final ThriftType THRIFT_TYPE = new ThriftType(ThriftType.STRING, Locale.class);
+
     @Inject
     public LocaleToLanguageTagCodec(ThriftCatalog thriftCatalog)
     {
         thriftCatalog.addDefaultCoercions(getClass());
     }
 
+    @CodecThriftType
+    public static ThriftType getThriftType()
+    {
+        return THRIFT_TYPE;
+    }
+
     @Override
     public ThriftType getType()
     {
-        return new ThriftType(ThriftType.STRING, Locale.class);
+        return THRIFT_TYPE;
     }
 
     @Override

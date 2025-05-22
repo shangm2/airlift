@@ -99,6 +99,9 @@ public class IdlGeneratorMojo
     @Parameter
     private boolean quiet;
 
+    @Parameter
+    private List<String> customCodecs;
+
     @Override
     public void execute()
             throws MojoExecutionException
@@ -113,6 +116,7 @@ public class IdlGeneratorMojo
                 .errorLogger(message -> getLog().error(message))
                 .warningLogger(message -> getLog().warn(message))
                 .verboseLogger(this::verbose)
+                .customCodecs(customCodecs)
                 .build();
 
         String idl;

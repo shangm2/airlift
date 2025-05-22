@@ -16,6 +16,7 @@
 package com.facebook.drift.codec.utils;
 
 import com.facebook.airlift.units.Duration;
+import com.facebook.drift.codec.CodecThriftType;
 import com.facebook.drift.codec.ThriftCodec;
 import com.facebook.drift.codec.internal.coercion.FromThrift;
 import com.facebook.drift.codec.internal.coercion.ToThrift;
@@ -31,16 +32,24 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
 public class DurationToMillisThriftCodec
         implements ThriftCodec<Duration>
 {
+    private static final ThriftType THRIFT_TYPE = new ThriftType(ThriftType.DOUBLE, Duration.class);
+
     @Inject
     public DurationToMillisThriftCodec(ThriftCatalog thriftCatalog)
     {
         thriftCatalog.addDefaultCoercions(getClass());
     }
 
+    @CodecThriftType
+    public static ThriftType getThriftType()
+    {
+        return THRIFT_TYPE;
+    }
+
     @Override
     public ThriftType getType()
     {
-        return new ThriftType(ThriftType.DOUBLE, Duration.class);
+        return THRIFT_TYPE;
     }
 
     @Override

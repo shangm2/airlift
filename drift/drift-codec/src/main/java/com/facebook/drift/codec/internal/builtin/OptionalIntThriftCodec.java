@@ -15,6 +15,7 @@
  */
 package com.facebook.drift.codec.internal.builtin;
 
+import com.facebook.drift.codec.CodecThriftType;
 import com.facebook.drift.codec.ThriftCodec;
 import com.facebook.drift.codec.metadata.ThriftType;
 import com.facebook.drift.protocol.TProtocolReader;
@@ -29,10 +30,18 @@ import static java.util.Objects.requireNonNull;
 public class OptionalIntThriftCodec
         implements ThriftCodec<OptionalInt>
 {
+    private static final ThriftType THRIFT_TYPE = new ThriftType(ThriftType.I32, OptionalInt.class, OptionalInt.empty());
+
     @Override
     public ThriftType getType()
     {
-        return new ThriftType(ThriftType.I32, OptionalInt.class, OptionalInt.empty());
+        return THRIFT_TYPE;
+    }
+
+    @CodecThriftType
+    public static ThriftType getThriftType()
+    {
+        return THRIFT_TYPE;
     }
 
     @Override

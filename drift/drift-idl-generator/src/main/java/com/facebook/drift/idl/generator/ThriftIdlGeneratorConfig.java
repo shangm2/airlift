@@ -15,8 +15,10 @@
  */
 package com.facebook.drift.idl.generator;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
+import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
@@ -31,6 +33,7 @@ public class ThriftIdlGeneratorConfig
     private final Consumer<String> errorLogger;
     private final Consumer<String> warningLogger;
     private final Consumer<String> verboseLogger;
+    private final List<String> customCodecs;
 
     private ThriftIdlGeneratorConfig(
             String defaultPackage,
@@ -39,7 +42,8 @@ public class ThriftIdlGeneratorConfig
             boolean recursive,
             Consumer<String> errorLogger,
             Consumer<String> warningLogger,
-            Consumer<String> verboseLogger)
+            Consumer<String> verboseLogger,
+            List<String> customCodecs)
     {
         this.defaultPackage = firstNonNull(defaultPackage, "");
         this.namespaces = ImmutableMap.copyOf(firstNonNull(namespaces, ImmutableMap.of()));
@@ -48,6 +52,7 @@ public class ThriftIdlGeneratorConfig
         this.errorLogger = firstNonNull(errorLogger, ignored -> {});
         this.warningLogger = firstNonNull(warningLogger, ignored -> {});
         this.verboseLogger = firstNonNull(verboseLogger, ignored -> {});
+        this.customCodecs = ImmutableList.copyOf(firstNonNull(customCodecs, ImmutableList.of()));
     }
 
     public static Builder builder()
@@ -90,6 +95,11 @@ public class ThriftIdlGeneratorConfig
         return verboseLogger;
     }
 
+    public List<String> getCustomCodecs()
+    {
+        return customCodecs;
+    }
+
     public static class Builder
     {
         private String defaultPackage;
@@ -99,6 +109,7 @@ public class ThriftIdlGeneratorConfig
         private Consumer<String> errorLogger;
         private Consumer<String> warningLogger;
         private Consumer<String> verboseLogger;
+        private List<String> customCodecs;
 
         private Builder() {}
 
@@ -144,6 +155,12 @@ public class ThriftIdlGeneratorConfig
             return this;
         }
 
+        public Builder customCodecs(List<String> customCodecs)
+        {
+            this.customCodecs = ImmutableList.copyOf(firstNonNull(customCodecs, ImmutableList.of()));
+            return this;
+        }
+
         public ThriftIdlGeneratorConfig build()
         {
             return new ThriftIdlGeneratorConfig(
@@ -153,7 +170,8 @@ public class ThriftIdlGeneratorConfig
                     recursive,
                     errorLogger,
                     warningLogger,
-                    verboseLogger);
+                    verboseLogger,
+                    customCodecs);
         }
     }
 }

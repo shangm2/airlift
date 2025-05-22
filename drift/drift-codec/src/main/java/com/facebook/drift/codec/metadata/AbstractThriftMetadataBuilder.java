@@ -703,7 +703,7 @@ public abstract class AbstractThriftMetadataBuilder
     }
 
     /**
-     * Verifies that the the fields all have a supported Java type and that all fields map to the
+     * Verifies that the fields all have a supported Java type and that all fields map to the
      * exact same ThriftType.
      */
     protected final void verifyFieldType(short id, String name, Collection<FieldMetadata> fields, ThriftCatalog catalog)

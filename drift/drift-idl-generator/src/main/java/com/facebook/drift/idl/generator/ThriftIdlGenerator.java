@@ -16,6 +16,8 @@
 package com.facebook.drift.idl.generator;
 
 import com.facebook.drift.annotations.ThriftService;
+import com.facebook.drift.codec.CodecThriftType;
+import com.facebook.drift.codec.ThriftCodec;
 import com.facebook.drift.codec.ThriftCodecManager;
 import com.facebook.drift.codec.ThriftProtocolType;
 import com.facebook.drift.codec.metadata.FieldKind;
@@ -36,6 +38,9 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.net.URI;
 import java.util.ArrayList;
@@ -129,11 +134,65 @@ public class ThriftIdlGenerator
 
         this.namespaces = config.getNamespaces();
         this.recursive = config.isRecursive();
+
+        for (String customCodecClassName : config.getCustomCodecs()) {
+            loadCustomCodec(customCodecClassName);
+        }
     }
 
-    public void addCustomType(ThriftType... type)
+    private void loadCustomCodec(String customCodecClassName)
     {
-        for (ThriftType t : type) {
+        Class<?> codecClass = load(customCodecClassName);
+        if (codecClass == null) {
+            throw new ThriftIdlGeneratorException("Failed to load codec class: " + customCodecClassName);
+        }
+        if (!ThriftCodec.class.isAssignableFrom(codecClass)) {
+            throw new ThriftIdlGeneratorException("Class " + customCodecClassName + " does not implement ThriftCodec");
+        }
+
+        // Look for a static method annotated with @CodecThriftType
+        ThriftType thriftType = null;
+        for (Method method : codecClass.getDeclaredMethods()) {
+            if (method.isAnnotationPresent(CodecThriftType.class)) {
+                if (!Modifier.isPublic(method.getModifiers())) {
+                    throw new ThriftIdlGeneratorException("Method annotated with @CodecThriftType must be public: " + customCodecClassName + "#" + method.getName());
+                }
+
+                if (!Modifier.isStatic(method.getModifiers())) {
+                    throw new ThriftIdlGeneratorException("Method annotated with @CodecThriftType must be static: " + customCodecClassName + "#" + method.getName());
+                }
+
+                if (method.getParameterCount() != 0) {
+                    throw new ThriftIdlGeneratorException("Method annotated with @CodecThriftType must have no parameters: " + customCodecClassName + "#" + method.getName());
+                }
+
+                if (!ThriftType.class.isAssignableFrom(method.getReturnType())) {
+                    throw new ThriftIdlGeneratorException("Method annotated with @CodecThriftType must return ThriftType: " + customCodecClassName + "#" + method.getName());
+                }
+
+                try {
+                    thriftType = (ThriftType) method.invoke(null);
+                    if (thriftType == null) {
+                        throw new ThriftIdlGeneratorException("Method annotated with @CodecThriftType returns null: " + customCodecClassName + "#" + method.getName());
+                    }
+                    break;
+                }
+                catch (IllegalAccessException | InvocationTargetException e) {
+                    throw new ThriftIdlGeneratorException("Method annotated with @CodecThriftType can not be invoked: " + customCodecClassName + "#" + method.getName());
+                }
+            }
+        }
+        if (thriftType == null) {
+            throw new ThriftIdlGeneratorException("Codec must have a public static method annotated with @CodecThriftType and return ThriftType: " + customCodecClassName);
+        }
+
+        addCustomType(thriftType);
+        catalog.addThriftType(thriftType);
+    }
+
+    public void addCustomType(ThriftType... types)
+    {
+        for (ThriftType t : types) {
             customTypes.add(t);
             knownTypes.add(t);
         }

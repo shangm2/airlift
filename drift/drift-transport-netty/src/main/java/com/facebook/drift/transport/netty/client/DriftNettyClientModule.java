@@ -28,7 +28,8 @@ import io.netty.buffer.ByteBufAllocator;
 import io.netty.util.concurrent.EventExecutorGroup;
 import jakarta.annotation.PreDestroy;
 import jakarta.inject.Inject;
-import jakarta.inject.Provider;
+
+import javax.inject.Provider;
 
 import java.lang.annotation.Annotation;
 

@@ -21,8 +21,9 @@ import com.google.inject.Module;
 import com.google.inject.Provides;
 import com.google.inject.Scopes;
 import jakarta.annotation.PreDestroy;
-import jakarta.inject.Provider;
 import jakarta.inject.Singleton;
+
+import javax.inject.Provider;
 
 import java.net.URI;
 import java.util.concurrent.ScheduledExecutorService;

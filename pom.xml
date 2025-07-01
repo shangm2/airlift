@@ -14,7 +14,7 @@
     <parent>
         <groupId>com.facebook.airlift</groupId>
         <artifactId>airbase</artifactId>
-        <version>105</version>
+        <version>106</version>
     </parent>
 
     <inceptionYear>2010</inceptionYear>

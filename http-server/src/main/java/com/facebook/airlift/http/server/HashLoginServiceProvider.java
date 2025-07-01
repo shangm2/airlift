@@ -16,9 +16,10 @@
 package com.facebook.airlift.http.server;
 
 import jakarta.inject.Inject;
-import jakarta.inject.Provider;
 import org.eclipse.jetty.security.HashLoginService;
 import org.eclipse.jetty.util.resource.PathResourceFactory;
+
+import javax.inject.Provider;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 

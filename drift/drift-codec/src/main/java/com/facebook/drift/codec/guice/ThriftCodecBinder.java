@@ -24,7 +24,8 @@ import com.google.inject.Key;
 import com.google.inject.Scopes;
 import com.google.inject.TypeLiteral;
 import com.google.inject.internal.MoreTypes.ParameterizedTypeImpl;
-import jakarta.inject.Provider;
+
+import javax.inject.Provider;
 
 import java.lang.reflect.Type;
 import java.util.List;

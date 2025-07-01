@@ -18,7 +18,8 @@ package com.facebook.airlift.discovery.client;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 import jakarta.inject.Inject;
-import jakarta.inject.Provider;
+
+import javax.inject.Provider;
 
 import static com.facebook.airlift.discovery.client.ServiceTypes.serviceType;
 import static java.util.Objects.requireNonNull;

@@ -23,11 +23,11 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import jakarta.annotation.Nullable;
-import jakarta.inject.Provider;
 import jakarta.servlet.Filter;
 import jakarta.servlet.Servlet;
 import org.eclipse.jetty.security.LoginService;
 
+import javax.inject.Provider;
 import javax.management.MBeanServer;
 
 import java.util.Map;

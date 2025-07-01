@@ -23,9 +23,9 @@ import com.google.inject.Module;
 import com.google.inject.ProvisionException;
 import com.google.inject.Scopes;
 import jakarta.inject.Inject;
-import jakarta.inject.Provider;
 import org.weakref.jmx.guice.MBeanModule;
 
+import javax.inject.Provider;
 import javax.sql.DataSource;
 
 import java.lang.annotation.Annotation;

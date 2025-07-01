@@ -20,8 +20,8 @@ import com.google.inject.Binder;
 import com.google.inject.Module;
 import com.google.inject.Scopes;
 import jakarta.inject.Inject;
-import jakarta.inject.Provider;
 
+import javax.inject.Provider;
 import javax.management.MBeanServer;
 
 import java.lang.management.ManagementFactory;

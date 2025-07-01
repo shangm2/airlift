@@ -28,8 +28,9 @@ import com.google.inject.Scopes;
 import com.google.inject.TypeLiteral;
 import jakarta.annotation.PreDestroy;
 import jakarta.inject.Inject;
-import jakarta.inject.Provider;
 import org.weakref.jmx.MBeanExporter;
+
+import javax.inject.Provider;
 
 import java.lang.annotation.Annotation;
 import java.time.ZonedDateTime;
@@ -103,7 +104,7 @@ public class ReplicatedStoreModule
 
     @ThreadSafe
     private static class ReplicatorProvider
-            implements jakarta.inject.Provider<Replicator>
+            implements Provider<Replicator>
     {
         private final String name;
         private final Key<? extends LocalStore> localStoreKey;

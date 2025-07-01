@@ -14,7 +14,8 @@
 package com.facebook.airlift.json.smile;
 
 import jakarta.inject.Inject;
-import jakarta.inject.Provider;
+
+import javax.inject.Provider;
 
 import java.lang.reflect.Type;
 

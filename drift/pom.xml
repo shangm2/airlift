@@ -54,8 +54,6 @@
         <dep.maven.version>3.5.3</dep.maven.version>
         <dep.asm.version>9.8</dep.asm.version>
 
-        <dep.nexus-staging-plugin.version>1.6.8</dep.nexus-staging-plugin.version>
-
         <dep.netty.version>4.1.107.Final</dep.netty.version>
     </properties>
 
@@ -393,17 +391,6 @@
                         <preparationGoals>clean verify -DskipTests</preparationGoals>
                     </configuration>
                 </plugin>
-
-                <plugin>
-                    <groupId>org.sonatype.plugins</groupId>
-                    <artifactId>nexus-staging-maven-plugin</artifactId>
-                    <version>${dep.nexus-staging-plugin.version}</version>
-                    <extensions>true</extensions>
-                    <configuration>
-                        <serverId>ossrh</serverId>
-                        <nexusUrl>https://oss.sonatype.org/</nexusUrl>
-                    </configuration>
-                </plugin>
             </plugins>
         </pluginManagement>
     </build>
@@ -432,18 +419,6 @@
                                 <arg>loopback</arg>
                             </gpgArguments>
                         </configuration>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-
-        <profile>
-            <id>deploy-to-ossrh</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.sonatype.plugins</groupId>
-                        <artifactId>nexus-staging-maven-plugin</artifactId>
                     </plugin>
                 </plugins>
             </build>

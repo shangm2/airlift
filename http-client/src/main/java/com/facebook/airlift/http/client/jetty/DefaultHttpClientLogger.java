@@ -159,12 +159,12 @@ class DefaultHttpClientLogger
         private void flush()
         {
             try {
-                lock.lock();
+                streamWriteLock.lock();
                 try {
                     getOutputStream().flush();
                 }
                 finally {
-                    lock.unlock();
+                    streamWriteLock.unlock();
                 }
             }
             catch (IOException e) {

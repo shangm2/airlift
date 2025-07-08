@@ -3,6 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>discovery</artifactId>
     <packaging>jar</packaging>
+    <name>discovery</name>
 
     <parent>
         <groupId>com.facebook.airlift</groupId>

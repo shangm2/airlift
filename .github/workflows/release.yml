@@ -92,8 +92,7 @@ jobs:
             -DkeepStagingRepositoryOnFailure=true \
             -DstagingProgressTimeoutMinutes=10 \
             -DskipTests \
-            -Poss-release \
-            -Pdeploy-to-ossrh
+            -Poss-release
 
       - name: Push changes and tags
         run: |

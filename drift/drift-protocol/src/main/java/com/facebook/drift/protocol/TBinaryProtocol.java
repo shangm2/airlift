@@ -16,8 +16,12 @@
 package com.facebook.drift.protocol;
 
 import com.facebook.drift.TException;
+import com.facebook.drift.buffer.ByteBufferPool;
 
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import static com.facebook.drift.protocol.TProtocolUtil.readAllInBatches;
 import static com.google.common.base.Preconditions.checkArgument;
@@ -36,7 +40,6 @@ public class TBinaryProtocol
         implements TProtocol
 {
     private static final TStruct ANONYMOUS_STRUCT = new TStruct("");
-
     protected static final int VERSION_MASK = 0xffff0000;
     protected static final int VERSION_1 = 0x80010000;
 
@@ -208,6 +211,21 @@ public class TBinaryProtocol
         int length = value.limit() - value.position();
         writeI32(length);
         transport.write(value.array(), value.position() + value.arrayOffset(), length);
+    }
+
+    @Override
+    public void writeBinaryFromBuffers(List<ByteBuffer> byteBuffers)
+            throws TException
+    {
+        int size = 0;
+        for (ByteBuffer byteBuffer : byteBuffers) {
+            size += byteBuffer.remaining();
+        }
+
+        writeI32(size);
+        for (ByteBuffer byteBuffer : byteBuffers) {
+            transport.write(byteBuffer.array(), byteBuffer.arrayOffset() + byteBuffer.position(), byteBuffer.remaining());
+        }
     }
 
     /**
@@ -402,6 +420,34 @@ public class TBinaryProtocol
         checkArgument((buf.length - offset) >= size, format("Binary is too large to be read into buffer: binary size: %s, buffer size: %s, buffer offset: %s", size, buf.length, offset));
 
         return readAllInBatches(transport, buf, offset, size);
+    }
+
+    @Override
+    public List<ByteBuffer> readBinaryToBuffers(ByteBufferPool pool)
+            throws TException
+    {
+        int size = checkSize(readI32());
+        if (size == 0) {
+            return Collections.emptyList();
+        }
+
+        List<ByteBuffer> byteBuffers = new ArrayList<>();
+
+        int remaining = size;
+
+        while (remaining > 0) {
+            ByteBuffer byteBuffer = pool.acquire();
+            byteBuffers.add(byteBuffer);
+            int bytesToRead = Math.min(remaining, byteBuffer.remaining());
+
+            transport.read(byteBuffer.array(), byteBuffer.arrayOffset(), bytesToRead);
+            byteBuffer.position(bytesToRead);
+            byteBuffer.limit(bytesToRead);
+            byteBuffer.flip();
+
+            remaining -= bytesToRead;
+        }
+        return byteBuffers;
     }
 
     private static int checkSize(int length)

@@ -16,8 +16,10 @@
 package com.facebook.drift.protocol;
 
 import com.facebook.drift.TException;
+import com.facebook.drift.buffer.ByteBufferPool;
 
 import java.nio.ByteBuffer;
+import java.util.List;
 
 public interface TProtocolReader
 {
@@ -86,4 +88,10 @@ public interface TProtocolReader
 
     int readBinary(byte[] buf, int offset)
             throws TException;
+
+    default List<ByteBuffer> readBinaryToBuffers(ByteBufferPool pool)
+            throws TException
+    {
+        throw new UnsupportedOperationException("readBinaryToBuffers is not supported");
+    }
 }

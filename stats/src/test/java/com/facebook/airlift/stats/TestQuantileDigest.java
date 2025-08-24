@@ -939,64 +939,57 @@ public class TestQuantileDigest
 
         assertTrue(iterator.hasNext());
         iterator.advance();
-        assertEquals(iterator.lowerBoundQuantile(), 0D, 0.0001);
-        assertEquals(iterator.upperBoundQuantile(), 0.066666667D, 0.0001);
         assertEquals(iterator.count(), 1D, 0.0001);
         assertEquals(iterator.cumulativeCount(), 1D, 0.0001);
+        assertEquals(iterator.cumulativeProportion(), 1D / 15, 0.0001);
         assertEquals(iterator.lowerBoundValue(), 0L);
         assertEquals(iterator.upperBoundValue(), 0L);
 
         assertTrue(iterator.hasNext());
         iterator.advance();
-        assertEquals(iterator.lowerBoundQuantile(), 0.066666667D, 0.0001);
-        assertEquals(iterator.upperBoundQuantile(), 0.333333333D, 0.0001);
         assertEquals(iterator.count(), 4D, 0.0001);
         assertEquals(iterator.cumulativeCount(), 5D, 0.0001);
+        assertEquals(iterator.cumulativeProportion(), 5D / 15, 0.0001);
         assertEquals(iterator.lowerBoundValue(), 2L);
         assertEquals(iterator.upperBoundValue(), 2L);
 
         assertTrue(iterator.hasNext());
         iterator.advance();
-        assertEquals(iterator.lowerBoundQuantile(), 0.333333333D, 0.0001);
-        assertEquals(iterator.upperBoundQuantile(), 0.733333333D, 0.0001);
         assertEquals(iterator.count(), 6D, 0.0001);
         assertEquals(iterator.cumulativeCount(), 11D, 0.0001);
+        assertEquals(iterator.cumulativeProportion(), 11D / 15, 0.0001);
         assertEquals(iterator.lowerBoundValue(), 3L);
         assertEquals(iterator.upperBoundValue(), 3L);
 
         assertTrue(iterator.hasNext());
         iterator.advance();
-        assertEquals(iterator.lowerBoundQuantile(), 0.733333333D, 0.0001);
-        assertEquals(iterator.upperBoundQuantile(), 0.8D, 0.0001);
         assertEquals(iterator.count(), 1D, 0.0001);
         assertEquals(iterator.cumulativeCount(), 12D, 0.0001);
+        assertEquals(iterator.cumulativeProportion(), 12D / 15, 0.0001);
         assertEquals(iterator.lowerBoundValue(), 4L);
         assertEquals(iterator.upperBoundValue(), 4L);
 
         assertTrue(iterator.hasNext());
         iterator.advance();
-        assertEquals(iterator.lowerBoundQuantile(), 0.8D, 0.0001);
-        assertEquals(iterator.upperBoundQuantile(), 0.866666667D, 0.0001);
         assertEquals(iterator.count(), 1D, 0.0001);
         assertEquals(iterator.cumulativeCount(), 13D, 0.0001);
+        assertEquals(iterator.cumulativeProportion(), 13D / 15, 0.0001);
         assertEquals(iterator.lowerBoundValue(), 5L);
         assertEquals(iterator.upperBoundValue(), 5L);
 
         assertTrue(iterator.hasNext());
         iterator.advance();
-        assertEquals(iterator.lowerBoundQuantile(), 0.866666667D, 0.0001);
-        assertEquals(iterator.upperBoundQuantile(), 0.933333333D, 0.0001);
         assertEquals(iterator.count(), 1D, 0.0001);
         assertEquals(iterator.cumulativeCount(), 14D, 0.0001);
+        assertEquals(iterator.cumulativeProportion(), 14D / 15, 0.0001);
         assertEquals(iterator.lowerBoundValue(), 6L);
         assertEquals(iterator.upperBoundValue(), 6L);
 
         assertTrue(iterator.hasNext());
         iterator.advance();
-        assertEquals(iterator.lowerBoundQuantile(), 0.933333333D, 0.0001);
-        assertEquals(iterator.upperBoundQuantile(), 1D, 0.0001);
         assertEquals(iterator.count(), 1D, 0.0001);
         assertEquals(iterator.cumulativeCount(), 15D, 0.0001);
+        assertEquals(iterator.cumulativeProportion(), 1D, 0.0001);
         assertEquals(iterator.lowerBoundValue(), 7L);
         assertEquals(iterator.upperBoundValue(), 7L);
 
@@ -1006,68 +999,111 @@ public class TestQuantileDigest
 
         assertTrue(iterator.hasNext());
         iterator.advance();
-        assertEquals(iterator.lowerBoundQuantile(), 0.933333333D, 0.0001);
-        assertEquals(iterator.upperBoundQuantile(), 1D, 0.0001);
         assertEquals(iterator.count(), 1D, 0.0001);
         assertEquals(iterator.cumulativeCount(), 1D, 0.0001);
+        assertEquals(iterator.cumulativeProportion(), 1D / 15, 0.0001);
         assertEquals(iterator.lowerBoundValue(), 7L);
         assertEquals(iterator.upperBoundValue(), 7L);
 
         assertTrue(iterator.hasNext());
         iterator.advance();
-        assertEquals(iterator.lowerBoundQuantile(), 0.866666667D, 0.0001);
-        assertEquals(iterator.upperBoundQuantile(), 0.933333333D, 0.0001);
         assertEquals(iterator.count(), 1D, 0.0001);
         assertEquals(iterator.cumulativeCount(), 2D, 0.0001);
+        assertEquals(iterator.cumulativeProportion(), 2D / 15, 0.0001);
         assertEquals(iterator.lowerBoundValue(), 6L);
         assertEquals(iterator.upperBoundValue(), 6L);
 
         assertTrue(iterator.hasNext());
         iterator.advance();
-        assertEquals(iterator.lowerBoundQuantile(), 0.8D, 0.0001);
-        assertEquals(iterator.upperBoundQuantile(), 0.866666667D, 0.0001);
         assertEquals(iterator.count(), 1D, 0.0001);
         assertEquals(iterator.cumulativeCount(), 3D, 0.0001);
+        assertEquals(iterator.cumulativeProportion(), 3D / 15, 0.0001);
         assertEquals(iterator.lowerBoundValue(), 5L);
         assertEquals(iterator.upperBoundValue(), 5L);
 
         assertTrue(iterator.hasNext());
         iterator.advance();
-        assertEquals(iterator.lowerBoundQuantile(), 0.733333333D, 0.0001);
-        assertEquals(iterator.upperBoundQuantile(), 0.8D, 0.0001);
         assertEquals(iterator.count(), 1D, 0.0001);
         assertEquals(iterator.cumulativeCount(), 4D, 0.0001);
+        assertEquals(iterator.cumulativeProportion(), 4D / 15, 0.0001);
         assertEquals(iterator.lowerBoundValue(), 4L);
         assertEquals(iterator.upperBoundValue(), 4L);
 
         assertTrue(iterator.hasNext());
         iterator.advance();
-        assertEquals(iterator.lowerBoundQuantile(), 0.333333333D, 0.0001);
-        assertEquals(iterator.upperBoundQuantile(), 0.733333333D, 0.0001);
         assertEquals(iterator.count(), 6D, 0.0001);
         assertEquals(iterator.cumulativeCount(), 10D, 0.0001);
+        assertEquals(iterator.cumulativeProportion(), 10D / 15, 0.0001);
         assertEquals(iterator.lowerBoundValue(), 3L);
         assertEquals(iterator.upperBoundValue(), 3L);
 
         assertTrue(iterator.hasNext());
         iterator.advance();
-        assertEquals(iterator.lowerBoundQuantile(), 0.066666667D, 0.0001);
-        assertEquals(iterator.upperBoundQuantile(), 0.333333333D, 0.0001);
         assertEquals(iterator.count(), 4D, 0.0001);
         assertEquals(iterator.cumulativeCount(), 14D, 0.0001);
+        assertEquals(iterator.cumulativeProportion(), 14D / 15, 0.0001);
         assertEquals(iterator.lowerBoundValue(), 2L);
         assertEquals(iterator.upperBoundValue(), 2L);
 
         assertTrue(iterator.hasNext());
         iterator.advance();
-        assertEquals(iterator.lowerBoundQuantile(), 0D, 0.0001);
-        assertEquals(iterator.upperBoundQuantile(), 0.066666667D, 0.0001);
         assertEquals(iterator.count(), 1D, 0.0001);
         assertEquals(iterator.cumulativeCount(), 15D, 0.0001);
+        assertEquals(iterator.cumulativeProportion(), 1D, 0.0001);
         assertEquals(iterator.lowerBoundValue(), 0L);
         assertEquals(iterator.upperBoundValue(), 0L);
 
         assertFalse(iterator.hasNext());
+    }
+
+    @Test
+    public void testIteratorTraversalOrder()
+    {
+        QuantileDigest digest = new QuantileDigest(.1);
+        addRange(digest, 0, 16384);
+        QuantileDigest.QuantileDigestIterator iterator = digest.iterator();
+
+        // In post-order traversal, the upper bounds of nodes should go in increasing order.
+        // In the case of a tie, nodes with shorter ranges should come before nodes with larger ranges.
+        long lastUpperBoundValue = Long.MIN_VALUE;
+        long lastLowerBoundValue = Long.MIN_VALUE;
+        while (iterator.hasNext()) {
+            iterator.advance();
+            long currentUpperBoundValue = iterator.upperBoundValue();
+            long currentLowerBoundValue = iterator.lowerBoundValue();
+            assertTrue(currentUpperBoundValue >= lastUpperBoundValue);
+
+            if (currentUpperBoundValue == lastUpperBoundValue) {
+                assertTrue(currentLowerBoundValue < lastLowerBoundValue);
+            }
+            lastUpperBoundValue = currentUpperBoundValue;
+            lastLowerBoundValue = currentLowerBoundValue;
+        }
+    }
+
+    @Test
+    public void testReverseIteratorTraversalOrder()
+    {
+        QuantileDigest digest = new QuantileDigest(.1);
+        addRange(digest, 0, 16384);
+        QuantileDigest.QuantileDigestIterator iterator = digest.reverseIterator();
+
+        // In reverse post-order traversal, the lower bounds of nodes should go in decreasing order.
+        // In the case of a tie, nodes with shorter ranges should come before nodes with larger ranges.
+        long lastUpperBoundValue = Long.MAX_VALUE;
+        long lastLowerBoundValue = Long.MAX_VALUE;
+        while (iterator.hasNext()) {
+            iterator.advance();
+            long currentUpperBoundValue = iterator.upperBoundValue();
+            long currentLowerBoundValue = iterator.lowerBoundValue();
+            assertTrue(currentLowerBoundValue <= lastLowerBoundValue);
+
+            if (currentLowerBoundValue == lastLowerBoundValue) {
+                assertTrue(currentUpperBoundValue > lastUpperBoundValue);
+            }
+            lastUpperBoundValue = currentUpperBoundValue;
+            lastLowerBoundValue = currentLowerBoundValue;
+        }
     }
 
     @Test
@@ -1083,8 +1119,7 @@ public class TestQuantileDigest
         assertEquals(iterator.lowerBoundValue(), 10);
         assertEquals(iterator.count(), 1.0);
         assertEquals(iterator.cumulativeCount(), 1.0);
-        assertEquals(iterator.lowerBoundQuantile(), 0.0);
-        assertEquals(iterator.upperBoundQuantile(), 1.0);
+        assertEquals(iterator.cumulativeProportion(), 1.0);
         assertFalse(iterator.hasNext());
     }
 
@@ -1113,7 +1148,7 @@ public class TestQuantileDigest
         assertFalse(iterator.hasNext());
 
         // Throws
-        iterator.upperBoundQuantile();
+        iterator.cumulativeCount();
     }
 
     @Test(expectedExceptions = NoSuchElementException.class)
@@ -1125,7 +1160,7 @@ public class TestQuantileDigest
 
         QuantileDigest.QuantileDigestIterator iterator = digest.iterator();
         // Throws
-        iterator.upperBoundQuantile();
+        iterator.cumulativeCount();
     }
 
     private QuantileDigest deserialize(Slice serialized)

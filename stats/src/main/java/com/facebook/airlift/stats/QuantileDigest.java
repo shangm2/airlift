@@ -361,7 +361,7 @@ public class QuantileDigest
         }, TraversalOrder.REVERSE);
 
         // we finished the traversal without consuming all quantiles. This means the remaining quantiles
-        // correspond to the max known value
+        // correspond to the min known value
         while (iterator.hasNext()) {
             builder.add(min);
             iterator.next();
@@ -1387,7 +1387,6 @@ public class QuantileDigest
         private int currentNode = -1; // current node in tree
         private int stackPosition = -1; // current head position in stack array
         private double cumulativeCount; // cumulative count of nodes in iteration
-        private double previousCumulativeCount; // previous value of cumulative count (0 if first element)
         private boolean advanced; // iterator position state
 
         public QuantileDigestIterator(
@@ -1439,26 +1438,24 @@ public class QuantileDigest
             return cumulativeCount;
         }
 
-        public double lowerBoundQuantile()
+        /**
+         * Proportion of cumulative weight for the current node, i.e., the proportion
+         * of all weight inserted into nodes processed so far
+         */
+        public double cumulativeProportion()
         {
-            validateCurrentNodePosition();
-            return previousCumulativeCount / weightedCount;
-        }
-
-        public double upperBoundQuantile()
-        {
-            validateCurrentNodePosition();
-            return cumulativeCount / weightedCount;
+            return cumulativeCount() / weightedCount;
         }
 
         public boolean hasNext()
         {
-            if (advanced) {
-                return stackIsNotEmpty();
+            if (!advanced) {
+                // try to move to next node
+                moveToNextNode();
+                advanced = true;
             }
-            moveToNextNode();
-            advanced = true;
-            return stackIsNotEmpty(); // if we advanced to the next value, we will always be at a valid position in the stack
+
+            return currentNode != -1; // when we run out of nodes, we'll be at position -1
         }
 
         public void advance()
@@ -1482,20 +1479,25 @@ public class QuantileDigest
                 int right = rights[node];
                 int left = lefts[node];
 
-                if (visited.get(node)) {
-                    push(right);
-
-                    if (counts[node] > 0) {
-                        previousCumulativeCount = cumulativeCount;
-                        cumulativeCount += counts[node];
-                        currentNode = node;
-                        return;
-                    }
-                }
-                else {
+                // go left if you can
+                // go right if you can
+                // visit self last
+                if (left != -1 && !visited.get(left)) {
                     push(node);
                     push(left);
-                    visited.set(node);
+                    continue;
+                }
+                if (right != -1 && !visited.get(right)) {
+                    push(node);
+                    push(right);
+                    continue;
+                }
+
+                cumulativeCount += counts[node];
+                currentNode = node;
+                visited.set(node);
+                if (counts[node] > 0) {
+                    return; // continue advancing if this node is empty
                 }
             }
 
@@ -1544,18 +1546,6 @@ public class QuantileDigest
         {
             // rights and lefts swapped to reverse order of iteration
             super(root, rights, lefts, counts, levels, values, weightedCount, min, max);
-        }
-
-        @Override
-        public double lowerBoundQuantile()
-        {
-            return 1 - super.upperBoundQuantile();
-        }
-
-        @Override
-        public double upperBoundQuantile()
-        {
-            return 1 - super.lowerBoundQuantile();
         }
     }
 }

@@ -89,7 +89,8 @@ public class TestHttpServerConfig
                 .setDefaultAllowedRoles("")
                 .setAllowUnsecureRequestsInAuthorizer(false)
                 .setSniHostCheck(true)
-                .setUriComplianceMode(UriCompliance.DEFAULT));
+                .setUriComplianceMode(UriCompliance.DEFAULT)
+                .setHttpComplianceViolations(""));
     }
 
     @Test
@@ -147,6 +148,7 @@ public class TestHttpServerConfig
                 .put("http-server.authorization.allow-unsecured-requests", "true")
                 .put("http-server.https.sni-host-check", "false")
                 .put("http-server.uri-compliance.mode", "LEGACY")
+                .put("http-server.http-compliance.violations", "UNSAFE_HOST_HEADER,MISMATCHED_AUTHORITY")
                 .build();
 
         HttpServerConfig expected = new HttpServerConfig()
@@ -200,7 +202,8 @@ public class TestHttpServerConfig
                 .setDefaultAllowedRoles("user, internal, admin")
                 .setAllowUnsecureRequestsInAuthorizer(true)
                 .setSniHostCheck(false)
-                .setUriComplianceMode(UriCompliance.LEGACY);
+                .setUriComplianceMode(UriCompliance.LEGACY)
+                .setHttpComplianceViolations("UNSAFE_HOST_HEADER,MISMATCHED_AUTHORITY");
 
         ConfigAssertions.assertFullMapping(properties, expected);
     }
@@ -209,5 +212,14 @@ public class TestHttpServerConfig
     {
         SslContextFactory.Server sslContextFactory = new SslContextFactory.Server();
         return Arrays.asList(sslContextFactory.getExcludeCipherSuites());
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class,
+            expectedExceptionsMessageRegExp = "Invalid value for http compliance violation: INVALID_VALUE. Permitted values are " +
+                    "\\[CASE_SENSITIVE_FIELD_NAME, CASE_INSENSITIVE_METHOD, HTTP_0_9, MULTILINE_FIELD_VALUE, MULTIPLE_CONTENT_LENGTHS, TRANSFER_ENCODING_WITH_CONTENT_LENGTH, " +
+                    "WHITESPACE_AFTER_FIELD_NAME, NO_COLON_AFTER_FIELD_NAME, DUPLICATE_HOST_HEADERS, UNSAFE_HOST_HEADER, MISMATCHED_AUTHORITY\\]")
+    public void testInvalidHttpComplianceViolation()
+    {
+        new HttpServerConfig().setHttpComplianceViolations("INVALID_VALUE");
     }
 }

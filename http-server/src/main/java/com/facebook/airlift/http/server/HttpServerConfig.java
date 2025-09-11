@@ -30,12 +30,14 @@ import com.google.common.collect.ImmutableSet;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
 import static com.facebook.airlift.http.server.UriCompliance.DEFAULT;
 import static com.facebook.airlift.units.DataSize.Unit.KILOBYTE;
 import static com.facebook.airlift.units.DataSize.Unit.MEGABYTE;
+import static com.google.common.collect.ImmutableList.toImmutableList;
 import static com.google.common.collect.ImmutableSet.toImmutableSet;
 import static java.util.Locale.ENGLISH;
 import static java.util.Objects.requireNonNull;
@@ -82,6 +84,7 @@ public class HttpServerConfig
     private String secureRandomAlgorithm;
     private List<String> includedCipherSuites = ImmutableList.of();
     private UriCompliance uriCompliance = DEFAULT;
+    private List<HttpComplianceViolation> httpComplianceViolations = ImmutableList.of();
 
     /**
      * This property is initialized with Jetty's default excluded ciphers list.
@@ -792,5 +795,32 @@ public class HttpServerConfig
     public UriCompliance getUriComplianceMode()
     {
         return uriCompliance;
+    }
+
+    @Config("http-server.http-compliance.violations")
+    @ConfigDescription("The http compliance violations permitted")
+    public HttpServerConfig setHttpComplianceViolations(String httpComplianceViolations)
+    {
+        this.httpComplianceViolations = Splitter
+                .on(',')
+                .trimResults()
+                .omitEmptyStrings()
+                .splitToList(requireNonNull(httpComplianceViolations, "httpComplianceViolations is null"))
+                .stream()
+                .map(violation -> {
+                    try {
+                        return HttpComplianceViolation.valueOf(violation);
+                    }
+                    catch (IllegalArgumentException e) {
+                        throw new IllegalArgumentException("Invalid value for http compliance violation: " + httpComplianceViolations + ". Permitted values are " + Arrays.toString(HttpComplianceViolation.values()), e);
+                    }
+                })
+                .collect(toImmutableList());
+        return this;
+    }
+
+    public List<HttpComplianceViolation> getHttpComplianceViolations()
+    {
+        return httpComplianceViolations;
     }
 }

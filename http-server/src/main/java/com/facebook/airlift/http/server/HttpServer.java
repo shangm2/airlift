@@ -33,6 +33,7 @@ import org.eclipse.jetty.ee10.servlet.ServletContextHandler;
 import org.eclipse.jetty.ee10.servlet.ServletHolder;
 import org.eclipse.jetty.ee10.servlet.security.ConstraintMapping;
 import org.eclipse.jetty.ee10.servlet.security.ConstraintSecurityHandler;
+import org.eclipse.jetty.http.HttpCompliance;
 import org.eclipse.jetty.http2.server.HTTP2CServerConnectionFactory;
 import org.eclipse.jetty.io.ConnectionStatistics;
 import org.eclipse.jetty.jmx.MBeanContainer;
@@ -147,6 +148,13 @@ public class HttpServer
         baseHttpConfiguration.setSendServerVersion(false);
         baseHttpConfiguration.setSendXPoweredBy(false);
         baseHttpConfiguration.setUriCompliance(config.getUriComplianceMode().getUriCompliance());
+        if (!config.getHttpComplianceViolations().isEmpty()) {
+            HttpCompliance.Violation[] jettyViolations = config.getHttpComplianceViolations().stream()
+                    .map(HttpComplianceViolation::getHttpComplianceViolation)
+                    .toArray(HttpCompliance.Violation[]::new);
+            HttpCompliance customCompliance = baseHttpConfiguration.getHttpCompliance().with("customViolations", jettyViolations);
+            baseHttpConfiguration.setHttpCompliance(customCompliance);
+        }
         if (config.getMaxRequestHeaderSize() != null) {
             baseHttpConfiguration.setRequestHeaderSize(toIntExact(config.getMaxRequestHeaderSize().toBytes()));
         }

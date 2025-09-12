@@ -5,12 +5,12 @@
     <parent>
         <groupId>com.facebook.airlift</groupId>
         <artifactId>airlift</artifactId>
-        <version>0.223-SNAPSHOT</version>
+        <version>0.223</version>
     </parent>
 
     <groupId>com.facebook.airlift.drift</groupId>
     <artifactId>drift-root</artifactId>
-    <version>0.223-SNAPSHOT</version>
+    <version>0.223</version>
     <packaging>pom</packaging>
 
     <name>drift-root</name>
@@ -19,7 +19,7 @@
     <scm>
         <connection>scm:git:git://github.com/airlift/drift.git</connection>
         <url>https://github.com/prestodb/drift</url>
-        <tag>HEAD</tag>
+        <tag>0.223</tag>
     </scm>
 
     <modules>

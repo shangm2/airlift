@@ -5,7 +5,6 @@ import com.facebook.airlift.http.client.Request;
 import com.facebook.airlift.http.client.spnego.KerberosConfig;
 import org.testng.annotations.Test;
 
-import java.io.UncheckedIOException;
 import java.nio.file.Path;
 
 import static com.facebook.airlift.http.client.HttpStatus.UNAUTHORIZED;
@@ -42,7 +41,7 @@ public class TestJettyHttpsClientSpnego
         super.testConnectTimeout();
     }
 
-    @Test(expectedExceptions = UncheckedIOException.class, expectedExceptionsMessageRegExp = ".* Failed to establish LoginContext for request .*")
+    @Test(expectedExceptions = RuntimeException.class, expectedExceptionsMessageRegExp = "Failed to establish LoginContext for request .*")
     public void testNegotiateAuthScheme()
             throws Exception
     {

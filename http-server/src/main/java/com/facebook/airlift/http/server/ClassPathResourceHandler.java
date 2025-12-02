@@ -139,8 +139,7 @@ public class ClassPathResourceHandler
             try (OutputStream out = Response.asBufferedOutputStream(request, response)) {
                 resourceStream.transferTo(out);
             }
-            response.write(true, ByteBuffer.wrap(EMPTY_BYTE), null);
-            callback.succeeded();
+            response.write(true, ByteBuffer.wrap(EMPTY_BYTE), callback);
         }
         catch (Exception e) {
             callback.failed(e);

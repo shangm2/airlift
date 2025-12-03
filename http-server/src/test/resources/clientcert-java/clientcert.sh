@@ -26,3 +26,13 @@ openssl pkcs12 -name client -inkey client.key -in client.crt -export -passout pa
 # create client truststore
 keytool -import -noprompt -alias ca -file ca.crt -storetype pkcs12 -storepass airlift -keystore client.truststore
 
+
+## We also create a server kesytore for testing the KeyStoreScanner
+
+# create updated server cert
+openssl req -new -key server.key -subj "/C=US/ST=CA/L=Palo Alto/O=updated/OU=Server/CN=localhost" -out updatedServer.csr
+openssl x509 -req -days 9999 -in updatedServer.csr -CA ca.crt -CAkey ca.key -set_serial 01 -out updatedServer.crt
+
+# create updated server keystore
+openssl pkcs12 -name server -inkey server.key -in updatedServer.crt -export -passout pass:airlift -out updatedServer.keystore
+keytool -import -noprompt -alias ca -file ca.crt -storetype pkcs12 -storepass airlift -keystore updatedServer.keystore

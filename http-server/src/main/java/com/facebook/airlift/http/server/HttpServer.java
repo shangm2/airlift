@@ -52,6 +52,7 @@ import org.eclipse.jetty.server.SslConnectionFactory;
 import org.eclipse.jetty.server.handler.ContextHandlerCollection;
 import org.eclipse.jetty.server.handler.StatisticsHandler;
 import org.eclipse.jetty.server.handler.gzip.GzipHandler;
+import org.eclipse.jetty.util.ssl.KeyStoreScanner;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
 import org.eclipse.jetty.util.thread.Scheduler;
@@ -245,6 +246,9 @@ public class HttpServer
                 if (config.getKeyManagerPassword() != null) {
                     sslContextFactory.setKeyManagerPassword(config.getKeyManagerPassword());
                 }
+                KeyStoreScanner keyStoreScanner = new KeyStoreScanner(sslContextFactory);
+                keyStoreScanner.setScanInterval(config.getKeystoreScanIntervalSeconds());
+                server.addBean(keyStoreScanner);
             }
             if (config.getTrustStorePath() != null) {
                 Optional<KeyStore> pemTrustStore = tryLoadPemTrustStore(config);
@@ -329,6 +333,9 @@ public class HttpServer
                         -1,
                         sslConnectionFactory,
                         new HttpConnectionFactory(adminConfiguration));
+                KeyStoreScanner keyStoreScanner = new KeyStoreScanner(sslContextFactory);
+                keyStoreScanner.setScanInterval(config.getKeystoreScanIntervalSeconds());
+                adminConnector.addBean(keyStoreScanner);
             }
             else {
                 HttpConnectionFactory http1 = new HttpConnectionFactory(adminConfiguration);

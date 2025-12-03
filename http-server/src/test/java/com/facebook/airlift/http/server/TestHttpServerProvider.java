@@ -35,13 +35,23 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.BeforeSuite;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
+
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.URI;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
 import java.util.Base64;
 import java.util.concurrent.ExecutionException;
@@ -60,6 +70,7 @@ import static com.google.common.io.RecursiveDeleteOption.ALLOW_INSECURE;
 import static com.google.common.io.Resources.getResource;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.nio.file.Files.createTempDirectory;
+import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
@@ -75,6 +86,34 @@ public class TestHttpServerProvider
     private NodeInfo nodeInfo;
     private HttpServerConfig config;
     private HttpServerInfo httpServerInfo;
+
+    @DataProvider
+    public static Object[][] serverAdminMode()
+    {
+        return new Object[][] {{false}, {true}};
+    }
+
+    private static HttpServlet createCertTestServlet()
+    {
+        return new HttpServlet()
+        {
+            @Override
+            protected void doGet(HttpServletRequest request, HttpServletResponse response)
+                    throws IOException
+            {
+                X509Certificate[] certs = (X509Certificate[]) request.getAttribute("jakarta.servlet.request.X509Certificate");
+                if ((certs == null) || (certs.length == 0)) {
+                    throw new RuntimeException("No client certificate");
+                }
+                if (certs.length > 1) {
+                    throw new RuntimeException("Received multiple client certificates");
+                }
+                X509Certificate cert = certs[0];
+                response.getWriter().write(cert.getSubjectX500Principal().getName());
+                response.setStatus(HttpServletResponse.SC_OK);
+            }
+        };
+    }
 
     @BeforeSuite
     public void setupSuite()
@@ -339,6 +378,50 @@ public class TestHttpServerProvider
         }
     }
 
+    @Test(dataProvider = "serverAdminMode")
+    public void testKeystoreUpdate(boolean serverAdminMode)
+            throws Exception
+    {
+        tempDir = createTempDirectory("test-keystore").toFile().getCanonicalFile();
+        Path tempKeyStore = tempDir.toPath().resolve("server.keystore").toAbsolutePath();
+        Path originalKeyStore = Path.of(getResource("clientcert-java/server.keystore").getPath());
+        Path updatedKeyStore = Path.of(getResource("clientcert-java/updatedServer.keystore").getPath());
+
+        // Start the server with the original keystore
+        Files.copy(originalKeyStore, tempKeyStore, REPLACE_EXISTING);
+
+        int keyStoreScanIntervalSeconds = 1;
+        config.setHttpEnabled(false)
+                .setAdminEnabled(serverAdminMode)
+                .setHttpsEnabled(true)
+                .setHttpsPort(0)
+                .setKeystorePath(tempKeyStore.toString())
+                .setKeystorePassword("airlift")
+                .setKeystoreScanIntervalSeconds(keyStoreScanIntervalSeconds);
+
+        createAndStartServer();
+
+        // Original certificate subject is returned
+        assertEquals(getServerCertSubject(), "CN=localhost,OU=Server,O=Airlift,L=Palo Alto,ST=CA,C=US");
+
+        // Replace the keystore with the replacement keystore
+        Files.copy(updatedKeyStore, tempKeyStore, REPLACE_EXISTING);
+
+        Thread.sleep(keyStoreScanIntervalSeconds * 1000L); // wait for the first scan to complete
+        // Poll every 100ms up to 2 seconds for the updated keystore to be picked up
+        for (int i = 0; i < 20; i++) {
+            try {
+                // Updated certificate subject is returned
+                assertEquals(getServerCertSubject(), "CN=localhost,OU=Server,O=updated,L=Palo Alto,ST=CA,C=US");
+                return;
+            }
+            catch (AssertionError e) {
+                Thread.sleep(100);
+            }
+        }
+        fail("Updated keystore was not picked up within expected time");
+    }
+
     @Test
     public void testClientCertificatePem()
             throws Exception
@@ -371,28 +454,6 @@ public class TestHttpServerProvider
             assertEquals(response.getStatusCode(), HttpServletResponse.SC_OK);
             assertEquals(response.getBody(), "CN=testing,OU=Client,O=Airlift,L=Palo Alto,ST=CA,C=US");
         }
-    }
-
-    private static HttpServlet createCertTestServlet()
-    {
-        return new HttpServlet()
-        {
-            @Override
-            protected void doGet(HttpServletRequest request, HttpServletResponse response)
-                    throws IOException
-            {
-                X509Certificate[] certs = (X509Certificate[]) request.getAttribute("jakarta.servlet.request.X509Certificate");
-                if ((certs == null) || (certs.length == 0)) {
-                    throw new RuntimeException("No client certificate");
-                }
-                if (certs.length > 1) {
-                    throw new RuntimeException("Received multiple client certificates");
-                }
-                X509Certificate cert = certs[0];
-                response.getWriter().write(cert.getSubjectX500Principal().getName());
-                response.setStatus(HttpServletResponse.SC_OK);
-            }
-        };
     }
 
     @Test
@@ -527,6 +588,40 @@ public class TestHttpServerProvider
             throws Exception
     {
         createAndStartServer(new DummyServlet());
+    }
+
+    private String getServerCertSubject()
+            throws NoSuchAlgorithmException, KeyManagementException, IOException
+    {
+        SSLContext trustAllSSLContext = SSLContext.getInstance("TLS");
+        trustAllSSLContext.init(null, new TrustManager[] {new X509TrustManager()
+        {
+            public void checkClientTrusted(X509Certificate[] certs, String authType)
+            {
+            }
+
+            public void checkServerTrusted(X509Certificate[] certs, String authType)
+            {
+            }
+
+            public X509Certificate[] getAcceptedIssuers()
+            {
+                return null;
+            }
+        }}, new SecureRandom());
+
+        URI uri = httpServerInfo.getHttpsUri();
+        HttpsURLConnection conn = (HttpsURLConnection) uri.toURL().openConnection();
+        conn.setSSLSocketFactory(trustAllSSLContext.getSocketFactory());
+        conn.connect();
+
+        X509Certificate[] certs = (X509Certificate[]) conn.getServerCertificates();
+        assertTrue(certs.length > 0, String.format("No certificates were obtained for URI: %s", uri));
+        // Return the leaf certificate subject
+        String subject = certs[0].getSubjectX500Principal().getName();
+        conn.disconnect();
+
+        return subject;
     }
 
     private void createAndStartServer(HttpServlet servlet)

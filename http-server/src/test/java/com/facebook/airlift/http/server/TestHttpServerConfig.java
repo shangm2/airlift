@@ -90,7 +90,8 @@ public class TestHttpServerConfig
                 .setAllowUnsecureRequestsInAuthorizer(false)
                 .setSniHostCheck(true)
                 .setUriComplianceMode(UriCompliance.DEFAULT)
-                .setHttpComplianceViolations(""));
+                .setHttpComplianceViolations("")
+                .setKeystoreScanIntervalSeconds(0));
     }
 
     @Test
@@ -149,6 +150,7 @@ public class TestHttpServerConfig
                 .put("http-server.https.sni-host-check", "false")
                 .put("http-server.uri-compliance.mode", "LEGACY")
                 .put("http-server.http-compliance.violations", "UNSAFE_HOST_HEADER,MISMATCHED_AUTHORITY")
+                .put("http-server.https.keystore.scan-interval-seconds", "2")
                 .build();
 
         HttpServerConfig expected = new HttpServerConfig()
@@ -203,7 +205,8 @@ public class TestHttpServerConfig
                 .setAllowUnsecureRequestsInAuthorizer(true)
                 .setSniHostCheck(false)
                 .setUriComplianceMode(UriCompliance.LEGACY)
-                .setHttpComplianceViolations("UNSAFE_HOST_HEADER,MISMATCHED_AUTHORITY");
+                .setHttpComplianceViolations("UNSAFE_HOST_HEADER,MISMATCHED_AUTHORITY")
+                .setKeystoreScanIntervalSeconds(2);
 
         ConfigAssertions.assertFullMapping(properties, expected);
     }

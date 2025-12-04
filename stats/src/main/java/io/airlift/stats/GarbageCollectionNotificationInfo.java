@@ -21,6 +21,10 @@ public class GarbageCollectionNotificationInfo
     private static final String MINOR_GC_NAME = "end of minor GC";
     private static final String MAJOR_GC_NAME = "end of major GC";
 
+    // ZGC uses different action names (no generational distinction)
+    private static final String ZGC_PAUSE = "end of GC pause";
+    private static final String ZGC_CYCLE = "end of GC cycle";
+
     private final String gcName;
     private final String gcAction;
     private final String gcCause;
@@ -87,6 +91,36 @@ public class GarbageCollectionNotificationInfo
     public boolean isMajorGc()
     {
         return gcAction.equalsIgnoreCase(MAJOR_GC_NAME);
+    }
+
+    public boolean isZgcCycle()
+    {
+        return gcAction.equalsIgnoreCase(ZGC_CYCLE);
+    }
+
+    public boolean isZgcPause()
+    {
+        return gcAction.equalsIgnoreCase(ZGC_PAUSE);
+    }
+
+    /**
+     * Returns true if this is a significant GC event where memory is reclaimed.
+     * For generational GCs (G1, Parallel, etc.), this means major GC.
+     * For ZGC, this means the end of a GC cycle.
+     */
+    public boolean isFullGcCycle()
+    {
+        return isMajorGc() || isZgcCycle();
+    }
+
+    public String getGcAction()
+    {
+        return gcAction;
+    }
+
+    public String getGcName()
+    {
+        return gcName;
     }
 
     @Override

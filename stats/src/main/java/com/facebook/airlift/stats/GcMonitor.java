@@ -20,4 +20,20 @@ public interface GcMonitor
     long getMajorGcCount();
 
     Duration getMajorGcTime();
+
+    long getLastHeapAfterGcBytes();
+
+    long getLastHeapBeforeGcBytes();
+
+    long getLastBytesReclaimed();
+
+    double getLastGcReclaimRatio();
+
+    long getHeapAfterGcGrowthBytes();
+
+    long getLastGcDurationMs();
+
+    long getLastMajorGcIntervalMs();
+
+    long getLastGcTimestampMs();
 }

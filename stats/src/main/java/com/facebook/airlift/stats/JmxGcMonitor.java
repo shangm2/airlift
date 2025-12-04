@@ -56,6 +56,14 @@ public class JmxGcMonitor
 
     private final TimeStat minorGc = new TimeStat();
 
+    private final AtomicLong lastHeapAfterGcBytes = new AtomicLong();
+    private final AtomicLong previousHeapAfterGcBytes = new AtomicLong();
+    private final AtomicLong lastHeapBeforeGcBytes = new AtomicLong();
+    private final AtomicLong lastBytesReclaimed = new AtomicLong();
+    private final AtomicLong lastGcDurationMs = new AtomicLong();
+    private final AtomicLong lastGcTimestampMs = new AtomicLong();
+    private final AtomicLong previousGcTimestampMs = new AtomicLong();
+
     @GuardedBy("this")
     private long lastGcEndTime = System.currentTimeMillis();
 
@@ -121,17 +129,20 @@ public class JmxGcMonitor
         if ("com.sun.management.gc.notification".equals(notification.getType())) {
             com.facebook.airlift.stats.GarbageCollectionNotificationInfo info = new com.facebook.airlift.stats.GarbageCollectionNotificationInfo((CompositeData) notification.getUserData());
 
-            if (info.isMajorGc()) {
+            if (info.isFullGcCycle()) {
+                // This handles both traditional major GC (G1, Parallel) and ZGC cycles
                 majorGcCount.incrementAndGet();
                 majorGcTime.addAndGet(info.getDurationMs());
                 majorGc.add(info.getDurationMs(), MILLISECONDS);
 
-                // assume that major GCs stop the application
+                updateMemoryMetrics(info);
+
                 long applicationRuntime = max(0, info.getStartTime() - lastGcEndTime);
                 lastGcEndTime = info.getEndTime();
 
                 log.info(
-                        "Major GC: application %sms, stopped %sms: %s -> %s",
+                        "%s: application %sms, stopped %sms: %s -> %s",
+                        info.isZgcCycle() ? "ZGC Cycle" : "Major GC",
                         applicationRuntime,
                         info.getDurationMs(),
                         info.getBeforeGcTotal(),
@@ -147,6 +158,103 @@ public class JmxGcMonitor
                         info.getBeforeGcTotal(),
                         info.getAfterGcTotal());
             }
+            else if (info.isZgcPause()) {
+                // ZGC pauses are very short STW events, track them separately
+                minorGc.add(info.getDurationMs(), MILLISECONDS);
+
+                log.debug(
+                        "ZGC Pause: duration %sms",
+                        info.getDurationMs());
+            }
         }
+    }
+
+    private void updateMemoryMetrics(com.facebook.airlift.stats.GarbageCollectionNotificationInfo info)
+    {
+        long now = System.currentTimeMillis();
+
+        // Calculate heap before and after GC
+        long heapBefore = info.getBeforeGcTotal().toBytes();
+        long heapAfter = info.getAfterGcTotal().toBytes();
+        long reclaimed = heapBefore - heapAfter;
+
+        // Update previous values before setting new ones
+        previousHeapAfterGcBytes.set(lastHeapAfterGcBytes.get());
+        previousGcTimestampMs.set(lastGcTimestampMs.get());
+
+        // Update current values
+        lastHeapBeforeGcBytes.set(heapBefore);
+        lastHeapAfterGcBytes.set(heapAfter);
+        lastGcTimestampMs.set(now);
+        lastBytesReclaimed.set(reclaimed);
+        lastGcDurationMs.set(info.getDurationMs());
+    }
+
+    @Override
+    @Managed
+    public long getLastHeapAfterGcBytes()
+    {
+        return lastHeapAfterGcBytes.get();
+    }
+
+    @Override
+    @Managed
+    public long getLastHeapBeforeGcBytes()
+    {
+        return lastHeapBeforeGcBytes.get();
+    }
+
+    @Override
+    @Managed
+    public long getLastBytesReclaimed()
+    {
+        return lastBytesReclaimed.get();
+    }
+
+    @Override
+    @Managed
+    public double getLastGcReclaimRatio()
+    {
+        long before = lastHeapBeforeGcBytes.get();
+        if (before == 0) {
+            return 0.0;
+        }
+        return (double) lastBytesReclaimed.get() / before;
+    }
+
+    @Override
+    @Managed
+    public long getHeapAfterGcGrowthBytes()
+    {
+        long previous = previousHeapAfterGcBytes.get();
+        if (previous == 0) {
+            return 0;
+        }
+        return lastHeapAfterGcBytes.get() - previous;
+    }
+
+    @Override
+    @Managed
+    public long getLastGcDurationMs()
+    {
+        return lastGcDurationMs.get();
+    }
+
+    @Override
+    @Managed
+    public long getLastMajorGcIntervalMs()
+    {
+        long previous = previousGcTimestampMs.get();
+        if (previous == 0) {
+            return 0;
+        }
+        return lastGcTimestampMs.get() - previous;
+    }
+
+    @Override
+    @Managed
+    public long getLastGcTimestampMs()
+    {
+        return lastGcTimestampMs.get();
     }
 }

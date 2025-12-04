@@ -27,10 +27,46 @@ public class TestingGcMonitor
     @GuardedBy("this")
     private long majorGcTimeNanos;
 
+    @GuardedBy("this")
+    private long lastHeapAfterGcBytes;
+
+    @GuardedBy("this")
+    private long previousHeapAfterGcBytes;
+
+    @GuardedBy("this")
+    private long lastHeapBeforeGcBytes;
+
+    @GuardedBy("this")
+    private long lastBytesReclaimed;
+
+    @GuardedBy("this")
+    private long lastGcDurationMs;
+
+    @GuardedBy("this")
+    private long lastGcTimestampMs;
+
+    @GuardedBy("this")
+    private long previousGcTimestampMs;
+
     public synchronized void recordMajorGc(Duration duration)
     {
         majorGcCount++;
         majorGcTimeNanos += duration.roundTo(NANOSECONDS);
+    }
+
+    public synchronized void recordMajorGc(Duration duration, long heapBeforeBytes, long heapAfterBytes)
+    {
+        majorGcCount++;
+        majorGcTimeNanos += duration.roundTo(NANOSECONDS);
+
+        previousHeapAfterGcBytes = lastHeapAfterGcBytes;
+        previousGcTimestampMs = lastGcTimestampMs;
+
+        lastHeapBeforeGcBytes = heapBeforeBytes;
+        lastHeapAfterGcBytes = heapAfterBytes;
+        lastBytesReclaimed = heapBeforeBytes - heapAfterBytes;
+        lastGcDurationMs = duration.toMillis();
+        lastGcTimestampMs = System.currentTimeMillis();
     }
 
     @Override
@@ -43,5 +79,62 @@ public class TestingGcMonitor
     public synchronized Duration getMajorGcTime()
     {
         return new Duration(majorGcTimeNanos, NANOSECONDS);
+    }
+
+    @Override
+    public synchronized long getLastHeapAfterGcBytes()
+    {
+        return lastHeapAfterGcBytes;
+    }
+
+    @Override
+    public synchronized long getLastHeapBeforeGcBytes()
+    {
+        return lastHeapBeforeGcBytes;
+    }
+
+    @Override
+    public synchronized long getLastBytesReclaimed()
+    {
+        return lastBytesReclaimed;
+    }
+
+    @Override
+    public synchronized double getLastGcReclaimRatio()
+    {
+        if (lastHeapBeforeGcBytes == 0) {
+            return 0.0;
+        }
+        return (double) lastBytesReclaimed / lastHeapBeforeGcBytes;
+    }
+
+    @Override
+    public synchronized long getHeapAfterGcGrowthBytes()
+    {
+        if (previousHeapAfterGcBytes == 0) {
+            return 0;
+        }
+        return lastHeapAfterGcBytes - previousHeapAfterGcBytes;
+    }
+
+    @Override
+    public synchronized long getLastGcDurationMs()
+    {
+        return lastGcDurationMs;
+    }
+
+    @Override
+    public synchronized long getLastMajorGcIntervalMs()
+    {
+        if (previousGcTimestampMs == 0) {
+            return 0;
+        }
+        return lastGcTimestampMs - previousGcTimestampMs;
+    }
+
+    @Override
+    public synchronized long getLastGcTimestampMs()
+    {
+        return lastGcTimestampMs;
     }
 }
